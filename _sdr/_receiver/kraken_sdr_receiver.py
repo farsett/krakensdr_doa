@@ -34,9 +34,42 @@ import numpy as np
 from iq_header import IQHeader
 from shmemIface import inShmemIface
 from variables import AUTO_GAIN_VALUE
+from collections import deque
 
 IN_SHMEM_IFACE_READ_TIMEOUT = 5.0  # sec
 
+class HistoryBuffer:
+    def __init__(self, buffer_size=50):
+        self.buffer = deque(maxlen=buffer_size)
+        self.lock = Lock()
+        self.last_viewed_frame = 0
+
+    def append(self, iq_header_copy, iq_samples_copy):
+        if len(iq_samples_copy[0]) > 0:
+            with self.lock:
+                frame = (iq_header_copy, iq_samples_copy)
+                self.buffer.append(frame)
+
+    def clear(self):
+        with self.lock:
+            self.last_viewed_frame = 0
+            self.buffer.clear()
+
+    def read(self):
+        with self.lock:
+            frame = self.buffer[self.last_viewed_frame]
+            self.last_viewed_frame += 1
+            if self.last_viewed_frame >= len(self.buffer):
+                self.last_viewed_frame = 0
+            return frame
+
+    def current_state(self):
+        with self.lock:
+            return self.last_viewed_frame, len(self.buffer)
+
+    def set_zero_frame(self):
+        with self.lock:
+            self.last_viewed_frame = 0
 
 class ReceiverRTLSDR:
     def __init__(self, data_que, data_interface="eth", logging_level=10):
@@ -52,6 +85,10 @@ class ReceiverRTLSDR:
         """
         self.logger = logging.getLogger(__name__)
         self.logger.setLevel(logging_level)
+
+        # History block
+        self.history_flag = False
+        self.history = HistoryBuffer()
 
         # DAQ parameters
         # These values are used by default to configure the DAQ through the configuration interface
@@ -221,12 +258,26 @@ class ReceiverRTLSDR:
             iq_samples_in = buffer[1024 : 1024 + incoming_payload_size].view(dtype=np.complex64).reshape(shape)
             # self.iq_samples = iq_samples_in.copy()
 
-            # Reuse the memory allocated for self.iq_samples if it has the
-            # correct shape
-            if self.iq_samples.shape != shape:
-                self.iq_samples = np.empty(shape, dtype=np.complex64)
+            if not self.history_flag:
+                # Пишем историю всегда, пока не включено воспроизведение
+                iq_header_copy = IQHeader()
+                iq_header_copy.decode_header(iq_header_bytes)
+                iq_samples_copy = iq_samples_in.copy()
+                self.history.append(iq_header_copy, iq_samples_copy)
 
-            np.copyto(self.iq_samples, iq_samples_in)
+                # Reuse the memory allocated for self.iq_samples if it has the
+                # correct shape
+                if self.iq_samples.shape != shape:
+                    self.iq_samples = np.empty(shape, dtype=np.complex64)
+                np.copyto(self.iq_samples, iq_samples_in)
+            else:
+                iq_header_hs, iq_samples_hs = self.history.read()
+                self.iq_header = iq_header_hs
+
+                if self.iq_samples.shape != iq_samples_hs.shape:
+                    self.iq_samples = np.empty(iq_samples_hs.shape, dtype=np.complex64)
+
+                np.copyto(self.iq_samples, iq_samples_hs)
 
             self.in_shmem_iface.send_ctr_buff_ready(active_buff_index)
 
@@ -349,6 +400,8 @@ class ReceiverRTLSDR:
             msg_bytes = cmd.encode() + freq_bytes + bytearray(116)
             try:
                 _thread.start_new_thread(self.ctr_iface_communication, (msg_bytes,))
+                self.history_flag = False
+                self.history.clear()
             except Exception as error:
                 self.logger.error("Unable to start communication thread")
                 self.logger.error(f"Error message: {error}")
@@ -381,6 +434,8 @@ class ReceiverRTLSDR:
             msg_bytes = cmd.encode() + gain_bytes + bytearray(128 - (self.M + 1) * 4)
             try:
                 _thread.start_new_thread(self.ctr_iface_communication, (msg_bytes,))
+                self.history_flag = False
+                self.history.clear()
             except Exception as error:
                 self.logger.error("Unable to start communication thread")
                 self.logger.error(f"Error message: {error}")
@@ -400,6 +455,8 @@ class ReceiverRTLSDR:
             msg_bytes = cmd + bytearray(128 - sys.getsizeof(cmd))
             try:
                 _thread.start_new_thread(self.ctr_iface_communication, (msg_bytes,))
+                self.history_flag = False
+                self.history.clear()
             except Exception as error:
                 self.logger.error("Unable to start communication thread")
                 self.logger.error(f"Error message: {error}")

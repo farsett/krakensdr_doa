@@ -219,6 +219,7 @@ def fetch_dsp_data(app, web_interface, spectrum_fig, waterfall_fig):
     ) and daq_status_update_flag:
         update_daq_status(app, web_interface)
     elif web_interface.pathname == "/spectrum" and spectrum_update_flag:
+        update_spectrum_statuses(app, web_interface)
         plot_spectrum(app, web_interface, spectrum_fig, waterfall_fig)
     # or (web_interface.pathname == "/doa" and
     # web_interface.reset_doa_graph_flag):
@@ -416,6 +417,39 @@ def settings_change_watcher(web_interface, settings_file_path, last_attempt_fail
     )
     web_interface.settings_change_timer.start()
 
+def update_spectrum_statuses(app, web_interface):
+    if web_interface.daq_frame_type == "Empty":
+        daq_power_level_str = "-"
+        daq_power_level_style = RED_COLOR
+    else:
+        if web_interface.daq_power_level:
+            daq_power_level_str = "Перегруз"
+            daq_power_level_style = {"color": "#e74c3c"}
+        else:
+            daq_power_level_str = "OK"
+            daq_power_level_style = {"color": "#7ccc63"}
+
+    frame, length = web_interface.module_receiver.history.current_state()
+    if web_interface.module_receiver.history_flag:
+        history_status = f"Фрейм {frame + 1} из {length}"
+        history_style = {"color": "#7ccc63"}
+    else:
+        history_status = f"Запись {length}"
+        history_style = {"color": "#e74c3c"}
+
+    app.push_mods(
+        {
+            "body_daq_power_level_2": {"children": daq_power_level_str},
+            "body_history": {"children": history_status},
+        }
+    )
+
+    app.push_mods(
+        {
+            "body_daq_power_level_2": {"style": daq_power_level_style},
+            "body_history": {"style": history_style},
+        }
+    )
 
 def update_daq_status(app, web_interface):
     #############################################

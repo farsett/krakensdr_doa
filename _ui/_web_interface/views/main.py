@@ -5,14 +5,7 @@ from variables import tak_folder_exists
 layout = html.Div(
     [
         dcc.Location(id="url", children="/config", refresh=True),
-        html.Div(
-            [
-                html.Img(
-                    src="../assets/kraken_interface_bw.png",
-                    style={"display": "block", "marginLeft": "auto", "marginRight": "auto", "height": "60px"},
-                )
-            ]
-        ),
+        #html.Div([html.Img(src="../assets/kraken_interface_bw.png",style={"display": "block", "marginLeft": "auto", "marginRight": "auto", "height": "60px"},)]),
         html.Div(
             [
                 html.A("Configuration", className="header_active", id="header_config", href="/config"),

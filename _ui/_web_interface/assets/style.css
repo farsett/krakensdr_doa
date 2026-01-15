@@ -243,3 +243,33 @@ iframe{
     width: calc( 100% - 15px );
   }
 }
+/*
+History buffer styles
+*/
+.field-body-2{
+  width: 100px;
+  display: inline-block;
+}
+
+.dummy-body{
+  width: 88px;
+  display: inline-block;
+}
+
+.row-block{
+  display: flex;
+  justify-content: center;
+}
+
+.play-btn{
+  background-color: #7ccc63;
+}
+.record-btn{
+  margin-left: 5px;
+  background-color: #e74c3c;
+}
+
+.play-btn:hover, .record-btn:hover{
+   color: rgb(0, 0, 0);
+   background-color: #f39c12; /*#ff6600;*/
+}

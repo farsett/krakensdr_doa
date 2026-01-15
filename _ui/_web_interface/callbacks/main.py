@@ -5,7 +5,8 @@ import time
 import dash_core_components as dcc
 import dash_devices as dash
 import numpy as np
-
+from dash.exceptions import PreventUpdate
+from loguru import logger
 # isort: off
 from maindash import app, spectrum_fig, waterfall_fig, web_interface
 
@@ -53,6 +54,26 @@ def func(client, connect):
         web_interface.dsp_timer.cancel()
         web_interface.gps_timer.cancel()
 
+@app.callback_shared(
+    None,
+    [
+        Input(component_id="play-history-btn", component_property="n_clicks"),
+    ]
+)
+def start_playing_history(clicks):
+    if clicks > 0:
+        web_interface.module_receiver.history_flag = True
+
+@app.callback_shared(
+    None,
+    [
+        Input(component_id="record-history-btn", component_property="n_clicks"),
+    ]
+)
+def start_record_history(clicks):
+    if clicks > 0:
+        web_interface.module_receiver.history.set_zero_frame()
+        web_interface.module_receiver.history_flag = False
 
 @app.callback_shared(
     None,
