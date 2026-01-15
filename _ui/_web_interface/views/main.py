@@ -5,6 +5,7 @@ from variables import tak_folder_exists
 layout = html.Div(
     [
         dcc.Location(id="url", children="/config", refresh=True),
+        # Hide logo for more space (sorry)
         #html.Div([html.Img(src="../assets/kraken_interface_bw.png",style={"display": "block", "marginLeft": "auto", "marginRight": "auto", "height": "60px"},)]),
         html.Div(
             [

@@ -5,8 +5,6 @@ import time
 import dash_core_components as dcc
 import dash_devices as dash
 import numpy as np
-from dash.exceptions import PreventUpdate
-from loguru import logger
 # isort: off
 from maindash import app, spectrum_fig, waterfall_fig, web_interface
 
@@ -61,6 +59,7 @@ def func(client, connect):
     ]
 )
 def start_playing_history(clicks):
+    # Запуск воспроизведения буфера
     if clicks > 0:
         web_interface.module_receiver.history_flag = True
 
@@ -71,6 +70,7 @@ def start_playing_history(clicks):
     ]
 )
 def start_record_history(clicks):
+    # Запись истории
     if clicks > 0:
         web_interface.module_receiver.history.set_zero_frame()
         web_interface.module_receiver.history_flag = False

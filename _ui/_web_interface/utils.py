@@ -418,6 +418,7 @@ def settings_change_watcher(web_interface, settings_file_path, last_attempt_fail
     web_interface.settings_change_timer.start()
 
 def update_spectrum_statuses(app, web_interface):
+    # Обновление статусов на странице Spectrum
     if web_interface.daq_frame_type == "Empty":
         daq_power_level_str = "-"
         daq_power_level_style = RED_COLOR
@@ -431,7 +432,7 @@ def update_spectrum_statuses(app, web_interface):
 
     frame, length = web_interface.module_receiver.history.current_state()
     if web_interface.module_receiver.history_flag:
-        history_status = f"Фрейм {frame + 1} из {length}"
+        history_status = f"Кадр {frame + 1} из {length}"
         history_style = {"color": "#7ccc63"}
     else:
         history_status = f"Запись {length}"
