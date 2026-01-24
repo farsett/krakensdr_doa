@@ -33,13 +33,13 @@ from threading import Lock
 import numpy as np
 from iq_header import IQHeader
 from shmemIface import inShmemIface
-from variables import AUTO_GAIN_VALUE
+from variables import AUTO_GAIN_VALUE, WATERFLOW_Y_SIZE
 from collections import deque
 
 IN_SHMEM_IFACE_READ_TIMEOUT = 5.0  # sec
 
 class HistoryBuffer:
-    def __init__(self, buffer_size=50):
+    def __init__(self, buffer_size=WATERFLOW_Y_SIZE):
         self.buffer = deque(maxlen=buffer_size)
         self.lock = Lock()
         self.last_viewed_frame = 0

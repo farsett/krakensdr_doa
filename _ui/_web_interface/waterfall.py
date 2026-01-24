@@ -1,5 +1,5 @@
 import plotly.graph_objects as go
-from variables import fig_layout
+from variables import fig_layout, WATERFLOW_Y_SIZE
 
 
 def init_waterfall(web_interface):
@@ -7,7 +7,7 @@ def init_waterfall(web_interface):
     waterfall_init_x = list(
         range(0, web_interface.module_signal_processor.spectrum_plot_size - 1)
     )  # [1] * web_interface.module_signal_processor.spectrum_window_size
-    waterfall_init = [[-80] * web_interface.module_signal_processor.spectrum_plot_size] * 50
+    waterfall_init = [[-80] * web_interface.module_signal_processor.spectrum_plot_size] * WATERFLOW_Y_SIZE
 
     waterfall_fig.add_trace(
         go.Heatmapgl(
@@ -39,7 +39,7 @@ def init_waterfall(web_interface):
     waterfall_fig.update_xaxes(tickfont_size=1)
     waterfall_fig.update_yaxes(tickfont_size=1, showgrid=False)
     waterfall_fig.update_layout(
-        margin=go.layout.Margin(t=5), hoverdistance=10000
+        margin=go.layout.Margin(t=5, b=5), hoverdistance=10000
     )  # Set hoverdistance to 1000 seems to be a hack that fixed clickData events not always firing
 
     return waterfall_fig

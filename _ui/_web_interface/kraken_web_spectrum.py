@@ -1,7 +1,7 @@
 import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
-from variables import figure_font_size, trace_colors, x, y
+from variables import figure_font_size, trace_colors, x, y, WATERFLOW_Y_SIZE
 
 
 def init_spectrum_fig(web_interface, fig_layout, trace_colors):
@@ -197,6 +197,6 @@ def plot_spectrum(app, web_interface, spectrum_fig, waterfall_fig):
             {
                 "spectrum-graph": {"figure": spectrum_fig},
                 # Add up spectrum for waterfall
-                "waterfall-graph": {"extendData": [dict(z=[[z]]), [0], 50]},
+                "waterfall-graph": {"extendData": [dict(z=[[z]]), [0], WATERFLOW_Y_SIZE]},
             }
         )

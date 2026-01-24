@@ -36,7 +36,7 @@ layout = html.Div(
                     figure=waterfall_fig,  # waterfall fig remains unchanged always due to slow speed to update entire graph #fig_dummy #spectrum_fig #fig_dummy
                 ),
             ],
-            style={"width": "100%", "height": "80vh"},
+            style={"width": "100%", "height": "75vh"},
         ),
     ]
 )
