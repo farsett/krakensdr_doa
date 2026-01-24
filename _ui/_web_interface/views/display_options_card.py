@@ -55,6 +55,22 @@ def get_display_options_card_layout():
                 ],
                 className="field",
             ),
+            html.Div(
+                [
+                    html.Div("Language:", id="label_language_iface", className="field-label"),
+                    dcc.Dropdown(
+                        id="language_iface",
+                        options=[
+                            {"label": "English", "value": "en"},
+                            {"label": "Русский", "value": "ru"},
+                        ],
+                        value=web_interface.language,
+                        style={"display": "inline-block"},
+                        className="field-body",
+                    ),
+                ],
+                className="field",
+            ),
         ],
         className="card",
     )

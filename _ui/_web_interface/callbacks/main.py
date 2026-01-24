@@ -75,6 +75,18 @@ def start_record_history(clicks):
         web_interface.module_receiver.history.set_zero_frame()
         web_interface.module_receiver.history_flag = False
 
+@app.callback(
+    Output("url", "pathname"),
+    [
+        Input(component_id="language_iface", component_property="value"),
+    ]
+)
+def update_language_iface(value):
+    # Смена языка интерфейса и запуск обновления страницы
+    web_interface.language = value
+    web_interface.save_configuration()
+    return "/config"
+
 @app.callback_shared(
     None,
     [

@@ -42,6 +42,7 @@ class WebInterface:
         #############################################
 
         # Web interface internal
+        self.language = dsp_settings.get("language", "en")
         self.disable_tooltips = dsp_settings.get("disable_tooltips", 0)
         self.page_update_rate = 1
         self._avg_win_size = 10
@@ -309,6 +310,7 @@ class WebInterface:
         data["en_hw_check"] = dsp_settings.get("en_hw_check", 0)
         data["logging_level"] = dsp_settings.get("logging_level", 5)
         data["disable_tooltips"] = dsp_settings.get("disable_tooltips", 0)
+        data["language"] = self.language
 
         # Output Data format. XML for Kerberos, CSV for Kracken, JSON future
         # XML, CSV, or JSON
