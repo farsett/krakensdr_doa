@@ -61,7 +61,9 @@ def func(client, connect):
 def start_playing_history(clicks):
     # Запуск воспроизведения буфера
     if clicks > 0:
-        web_interface.module_receiver.history_flag = True
+        # Ограничение на минимальный размер буфера для воспроизведения
+        if web_interface.module_receiver.history.current_state()[1] > 10:
+            web_interface.module_receiver.history_flag = True
 
 @app.callback_shared(
     None,

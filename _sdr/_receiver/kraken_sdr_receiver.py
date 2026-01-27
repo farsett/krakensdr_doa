@@ -43,16 +43,23 @@ class HistoryBuffer:
         self.buffer = deque(maxlen=buffer_size)
         self.lock = Lock()
         self.last_viewed_frame = 0
+        self.frame_index = 0
 
     def append(self, iq_header_copy, iq_samples_copy):
         if len(iq_samples_copy[0]) > 0:
             with self.lock:
+                # Пропускаем первые два кадра после калибровки
+                self.frame_index += 1
+                if self.frame_index < 3:
+                    return
+
                 frame = (iq_header_copy, iq_samples_copy)
                 self.buffer.append(frame)
 
     def clear(self):
         with self.lock:
             self.last_viewed_frame = 0
+            self.frame_index = 0
             self.buffer.clear()
 
     def read(self):
@@ -260,10 +267,11 @@ class ReceiverRTLSDR:
 
             if not self.history_flag:
                 # Пишем историю всегда, пока не включено воспроизведение
-                iq_header_copy = IQHeader()
-                iq_header_copy.decode_header(iq_header_bytes)
+                #iq_header_copy = IQHeader()
+                #iq_header_copy.decode_header(iq_header_bytes)
                 iq_samples_copy = iq_samples_in.copy()
-                self.history.append(iq_header_copy, iq_samples_copy)
+                if self.iq_header.frame_type == 0:
+                    self.history.append(self.iq_header, iq_samples_copy)
 
                 # Reuse the memory allocated for self.iq_samples if it has the
                 # correct shape
